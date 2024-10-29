@@ -29,6 +29,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
+    namespace  "io.github.v7lin.alipay_kit_android"
     compileSdkVersion 31
 
     compileOptions {
@@ -53,8 +54,6 @@ android {
             consumerProguardFiles 'consumer-vendor-rules.pro'
         }
     }
-    
-    namespace 'io.github.v7lin.alipay_kit_android'
 
     dependencies {
         vendorImplementation 'com.alipay.sdk:alipaysdk-android:15.8.14@aar'
