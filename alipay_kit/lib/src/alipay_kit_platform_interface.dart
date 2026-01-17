@@ -3,6 +3,8 @@ import 'package:alipay_kit/src/constant.dart';
 import 'package:alipay_kit/src/model/resp.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import 'ios_auth_response.dart';
+
 /// 支付宝
 ///
 /// * 默认不包含iOS支付
@@ -37,6 +39,11 @@ abstract class AlipayKitPlatform extends PlatformInterface {
   /// 登录
   Stream<AlipayResp> authResp() {
     throw UnimplementedError('authResp() has not been implemented.');
+  }
+
+  /// ios登录
+  Stream<AlipayIosAuthResponse> iosAuthResponse() {
+    throw UnimplementedError('iosAuthResponse() has not been implemented.');
   }
 
   /// 检测支付宝是否已安装
