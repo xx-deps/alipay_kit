@@ -39,7 +39,7 @@
 //                                               [self->_channel invokeMethod:@"onAuthResp" arguments:resultDic];
 //                                           }];
          NSDictionary  *params = @{kAFServiceOptionBizParams: @{
-                                      @"url" :  @"https://authweb.alipay.com/auth?auth_type=PURE_OAUTH_SDK&app_id=2021003127679503&scope=auth_user&state=xxx"
+                                      @"url" :  authInfo
                                      },
                              kAFServiceOptionCallbackScheme:  @"alipayauthbinding" ,
                              };
