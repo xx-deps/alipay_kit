@@ -43,8 +43,7 @@
                              kAFServiceOptionCallbackScheme:  @"alipayauthbinding" ,
                              };
         [AFServiceCenter callService:(AFServiceAuth) withParams:params andCompletion:^(AFAuthServiceResponse *response) {
-            NSDictionary  *resultDic = @{@"result":response.result};
-            [self->_channel invokeMethod:@"onAuthResp" arguments:resultDic];
+            [self->_channel invokeMethod:@"onIosAuthResp" arguments:response.result];
         }];
 //        [AFServiceCenter callService:AFServiceEInvoice withParams:params andCompletion:^(AFServiceResponse *response) {
 //            NSLog ( @"%@" , response.result);
@@ -83,11 +82,12 @@
 //                                         }];
         [AFServiceCenter handleResponseURL:url withCompletion:^(AFAuthServiceResponse *response) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
-            NSDictionary  *resultDic = @{
-                                         @"result":response.result
-                                        
-            };
-            [strongSelf->_channel invokeMethod:@"onPayResp" arguments:resultDic];
+//            NSDictionary  *resultDic = @{
+//                                         @"result":response.result
+//                                        
+//            };
+            
+            [strongSelf->_channel invokeMethod:@"onIosAuthResp" arguments:response.result];
         }];
 //        [AFServiceCenter handleResponseURL:url withCompletion:^(AFServiceResponse *response) {
 //                   // 该接口上的block只有在跳转支付宝客户端授权过程中压后台App被系统kill掉时才会被回调
