@@ -44,7 +44,7 @@
                              kAFServiceOptionCallbackScheme:  @"alipayauthbinding" ,
                              };
         [AFServiceCenter callService:(AFServiceAuth) withParams:params andCompletion:^(AFAuthServiceResponse *response) {
-            [self->_channel invokeMethod:@"onAuthResp" arguments:response];
+            [self->_channel invokeMethod:@"onAuthResp" arguments:response.result];
         }];
 //        [AFServiceCenter callService:AFServiceEInvoice withParams:params andCompletion:^(AFServiceResponse *response) {
 //            NSLog ( @"%@" , response.result);
@@ -66,9 +66,9 @@
 }
 
 - (BOOL)handleOpenURL:(NSURL *)url {
-//    if ([url.host isEqualToString:@"safepay"]) {
-//        // 支付跳转支付宝钱包进行支付，处理支付结果
-//        __weak typeof(self) weakSelf = self;
+    if ([url.host isEqualToString:@"apmqpdispatch"]) {
+        // 支付跳转支付宝钱包进行支付，处理支付结果
+        __weak typeof(self) weakSelf = self;
 //        [[AlipaySDK defaultService] processOrderWithPaymentResult:url
 //                                                  standbyCallback:^(NSDictionary *resultDic) {
 //                                                      __strong typeof(weakSelf) strongSelf = weakSelf;
@@ -81,9 +81,32 @@
 //                                             __strong typeof(weakSelf) strongSelf = weakSelf;
 //                                             [strongSelf->_channel invokeMethod:@"onAuthResp" arguments:resultDic];
 //                                         }];
-//
-//        return YES;
-//    }
+        [AFServiceCenter handleResponseURL:url withCompletion:^(AFAuthServiceResponse *response) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            NSDictionary  *resultDic = @{
+                                         @"result":response.result
+                                        
+            };
+            [strongSelf->_channel invokeMethod:@"onPayResp" arguments:resultDic];
+        }];
+//        [AFServiceCenter handleResponseURL:url withCompletion:^(AFServiceResponse *response) {
+//                   // 该接口上的block只有在跳转支付宝客户端授权过程中压后台App被系统kill掉时才会被回调
+//                   if  (AFResSuccess == response.responseCode) {
+//                       NSLog ( @"%@" , response.result);
+//                       /* 数据样例
+//                      {
+//                        "app_id" = 2016051801417322;
+//                        "auth_code" = 41f084c3ab4b4be6b6dd8d25dac1YF46;
+//                        "result_code" = SUCCESS;
+//                        "scope" = auth_user;
+//                        "state" = XXXXX（自定义 base64 编码）;
+//                      }
+//                    */
+//                  }
+//                }];
+
+        return YES;
+    }
     return NO;
 }
 
