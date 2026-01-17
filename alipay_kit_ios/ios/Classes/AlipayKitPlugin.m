@@ -39,12 +39,12 @@
 //                                               [self->_channel invokeMethod:@"onAuthResp" arguments:resultDic];
 //                                           }];
          NSDictionary  *params = @{kAFServiceOptionBizParams: @{
-                                      @"url" :  authInfo
-                                     },
+                             @"url":authInfo},
                              kAFServiceOptionCallbackScheme:  @"alipayauthbinding" ,
                              };
         [AFServiceCenter callService:(AFServiceAuth) withParams:params andCompletion:^(AFAuthServiceResponse *response) {
-            [self->_channel invokeMethod:@"onAuthResp" arguments:response.result];
+            NSDictionary  *resultDic = @{@"result":response.result};
+            [self->_channel invokeMethod:@"onAuthResp" arguments:resultDic];
         }];
 //        [AFServiceCenter callService:AFServiceEInvoice withParams:params andCompletion:^(AFServiceResponse *response) {
 //            NSLog ( @"%@" , response.result);
