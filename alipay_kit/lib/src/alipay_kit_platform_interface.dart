@@ -1,9 +1,10 @@
-import 'package:alipay_kit/src/alipay_kit_method_channel.dart';
-import 'package:alipay_kit/src/constant.dart';
-import 'package:alipay_kit/src/model/resp.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'ios_auth_response.dart';
+import 'alipay_kit_method_channel.dart';
+import 'constant.dart';
+import 'model/auth_result.dart';
+import 'model/resp.dart';
+
 
 /// 支付宝
 ///
@@ -37,13 +38,8 @@ abstract class AlipayKitPlatform extends PlatformInterface {
   }
 
   /// 登录
-  Stream<AlipayResp> authResp() {
+  Stream<AlipayAuthResult> authResp() {
     throw UnimplementedError('authResp() has not been implemented.');
-  }
-
-  /// ios登录
-  Stream<AlipayIosAuthResponse> iosAuthResponse() {
-    throw UnimplementedError('iosAuthResponse() has not been implemented.');
   }
 
   /// 检测支付宝是否已安装
@@ -52,11 +48,10 @@ abstract class AlipayKitPlatform extends PlatformInterface {
   }
 
   /// 支付环境
-  Future<void> setEnv({
-    required AlipayEnv env,
-  }) {
+  Future<void> setEnv({required AlipayEnv env}) {
     throw UnimplementedError(
-        'setEnv({required env}) has not been implemented.');
+      'setEnv({required env}) has not been implemented.',
+    );
   }
 
   /// 支付
@@ -66,15 +61,14 @@ abstract class AlipayKitPlatform extends PlatformInterface {
     bool isShowLoading = true,
   }) {
     throw UnimplementedError(
-        'pay({required orderInfo, isShowLoading}) has not been implemented.');
+      'pay({required orderInfo, isShowLoading}) has not been implemented.',
+    );
   }
 
   /// 登录
-  Future<void> auth({
-    required String authInfo,
-    bool isShowLoading = true,
-  }) {
+  Future<void> auth({required String authInfo, bool isShowLoading = true}) {
     throw UnimplementedError(
-        'auth({required info, isShowLoading}) has not been implemented.');
+      'auth({required info, isShowLoading}) has not been implemented.',
+    );
   }
 }

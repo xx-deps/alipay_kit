@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:alipay_kit/src/model/auth_result.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
 import 'alipay_kit_platform_interface.dart';
 import 'constant.dart';
 import 'model/resp.dart';
-import 'ios_auth_response.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 /// An implementation of [AlipayKitPlatform] that uses method channels.
 class MethodChannelAlipayKit extends AlipayKitPlatform {
@@ -18,10 +19,10 @@ class MethodChannelAlipayKit extends AlipayKitPlatform {
 
   final StreamController<AlipayResp> _payRespStreamController =
       StreamController<AlipayResp>.broadcast();
-  final StreamController<AlipayResp> _authRespStreamController =
-      StreamController<AlipayResp>.broadcast();
-final StreamController<AlipayIosAuthResponse> _iosAuthRespStreamController =
-      StreamController<AlipayIosAuthResponse>.broadcast();
+
+  final StreamController<AlipayAuthResult> _authRespStreamController =
+      StreamController<AlipayAuthResult>.broadcast();
+
   Future<dynamic> _handleMethod(MethodCall call) async {
     switch (call.method) {
       case 'onPayResp':
@@ -31,23 +32,19 @@ final StreamController<AlipayIosAuthResponse> _iosAuthRespStreamController =
           ),
         );
       case 'onAuthResp':
-        _authRespStreamController.add(
-          AlipayResp.fromJson(
-            (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>(),
-          ),
-        );
-      case 'onIosAuthResp':
-        print('onIosAuthResp----${call.arguments}');
-        final authCode = call.arguments['auth_code'];
-        final scope = call.arguments['scope'];
-        final state = call.arguments['state'];
-        _authRespStreamController.add(
-          AlipayResp(
-            resultStatus: 0,
-            result: call.arguments['result'],
-            memo: '',
-          ),
-        );
+        if (Platform.isAndroid) {
+          _authRespStreamController.add(
+            AlipayAuthResultAndroid.fromMap(
+              (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>(),
+            ),
+          );
+        } else {
+          _authRespStreamController.add(
+            AlipayAuthResultIos.fromMap(
+              (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>(),
+            ),
+          );
+        }
     }
   }
 
@@ -57,14 +54,10 @@ final StreamController<AlipayIosAuthResponse> _iosAuthRespStreamController =
   }
 
   @override
-  Stream<AlipayResp> authResp() {
+  Stream<AlipayAuthResult> authResp() {
     return _authRespStreamController.stream;
   }
 
-  @override
-  Stream<AlipayIosAuthResponse> iosAuthResponse() {
-    return _iosAuthRespStreamController.stream;
-  }
   @override
   Future<bool> isInstalled() async {
     return await methodChannel.invokeMethod<bool?>('isInstalled') ?? false;
