@@ -55,6 +55,10 @@ class AlipayAuthResultAndroid extends AlipayAuthResult {
 
   String get authCode => resultMap().parseString('auth_code');
   String get userId => resultMap().parseString('user_id');
+  @override
+  String toString() {
+    return 'AlipayAuthResultAndroid(resultStatus: $resultStatus, result: $result, memo: $memo, isSuccessful: $isSuccessful, isCancelled: $isCancelled, success: $success, resultCode: $resultCode, authCode: $authCode, userId: $userId)';
+  }
 }
 
 class AlipayAuthResultIos extends AlipayAuthResult {
@@ -69,6 +73,10 @@ class AlipayAuthResultIos extends AlipayAuthResult {
   String get state => data.parseString('state');
   String get resultCode => data.parseString('result_code');
   String get appId => data.parseString('app_id');
+  @override
+  String toString() {
+    return 'AlipayAuthResultIos(authCode: $authCode, scope: $scope, state: $state, resultCode: $resultCode, appId: $appId)';
+  }
 }
 
 extension on Map<String, Object?> {
