@@ -1,33 +1,50 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:alipay_kit/src/alipay_kit_platform_interface.dart';
-import 'package:alipay_kit/src/constant.dart';
-import 'package:alipay_kit/src/model/resp.dart';
+import 'package:alipay_kit/src/model/auth_result.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+
+import 'alipay_kit_platform_interface.dart';
+import 'constant.dart';
+import 'model/resp.dart';
 
 /// An implementation of [AlipayKitPlatform] that uses method channels.
 class MethodChannelAlipayKit extends AlipayKitPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  late final MethodChannel methodChannel =
-      const MethodChannel('v7lin.github.io/alipay_kit')
-        ..setMethodCallHandler(_handleMethod);
+  late final MethodChannel methodChannel = const MethodChannel(
+    'v7lin.github.io/alipay_kit',
+  )..setMethodCallHandler(_handleMethod);
 
   final StreamController<AlipayResp> _payRespStreamController =
       StreamController<AlipayResp>.broadcast();
-  final StreamController<AlipayResp> _authRespStreamController =
-      StreamController<AlipayResp>.broadcast();
+
+  final StreamController<AlipayAuthResult> _authRespStreamController =
+      StreamController<AlipayAuthResult>.broadcast();
 
   Future<dynamic> _handleMethod(MethodCall call) async {
     switch (call.method) {
       case 'onPayResp':
-        _payRespStreamController.add(AlipayResp.fromJson(
-            (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>()));
+        _payRespStreamController.add(
+          AlipayResp.fromJson(
+            (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>(),
+          ),
+        );
       case 'onAuthResp':
-        _authRespStreamController.add(AlipayResp.fromJson(
-            (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>()));
+        if (Platform.isAndroid) {
+          _authRespStreamController.add(
+            AlipayAuthResultAndroid.fromMap(
+              (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>(),
+            ),
+          );
+        } else {
+          _authRespStreamController.add(
+            AlipayAuthResultIos.fromMap(
+              (call.arguments as Map<dynamic, dynamic>).cast<String, dynamic>(),
+            ),
+          );
+        }
     }
   }
 
@@ -37,7 +54,7 @@ class MethodChannelAlipayKit extends AlipayKitPlatform {
   }
 
   @override
-  Stream<AlipayResp> authResp() {
+  Stream<AlipayAuthResult> authResp() {
     return _authRespStreamController.stream;
   }
 
@@ -47,16 +64,11 @@ class MethodChannelAlipayKit extends AlipayKitPlatform {
   }
 
   @override
-  Future<void> setEnv({
-    required AlipayEnv env,
-  }) {
+  Future<void> setEnv({required AlipayEnv env}) {
     assert(Platform.isAndroid);
-    return methodChannel.invokeMethod<void>(
-      'setEnv',
-      <String, dynamic>{
-        'env': env.index,
-      },
-    );
+    return methodChannel.invokeMethod<void>('setEnv', <String, dynamic>{
+      'env': env.index,
+    });
   }
 
   @override
@@ -65,27 +77,18 @@ class MethodChannelAlipayKit extends AlipayKitPlatform {
     bool dynamicLaunch = false,
     bool isShowLoading = true,
   }) {
-    return methodChannel.invokeMethod<void>(
-      'pay',
-      <String, dynamic>{
-        'orderInfo': orderInfo,
-        'dynamicLaunch': dynamicLaunch,
-        'isShowLoading': isShowLoading,
-      },
-    );
+    return methodChannel.invokeMethod<void>('pay', <String, dynamic>{
+      'orderInfo': orderInfo,
+      'dynamicLaunch': dynamicLaunch,
+      'isShowLoading': isShowLoading,
+    });
   }
 
   @override
-  Future<void> auth({
-    required String authInfo,
-    bool isShowLoading = true,
-  }) {
-    return methodChannel.invokeMethod<void>(
-      'auth',
-      <String, dynamic>{
-        'authInfo': authInfo,
-        'isShowLoading': isShowLoading,
-      },
-    );
+  Future<void> auth({required String authInfo, bool isShowLoading = true}) {
+    return methodChannel.invokeMethod<void>('auth', <String, dynamic>{
+      'authInfo': authInfo,
+      'isShowLoading': isShowLoading,
+    });
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:alipay_kit/src/json/jser_converter.dart';
-import 'package:alipay_kit/src/model/auth_result.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'resp.g.dart';
@@ -39,16 +38,6 @@ class AlipayResp {
 
   bool get isCancelled => resultStatus == 6001;
 
-  AlipayAuthResult? parseAuthResult() {
-    if (isSuccessful) {
-      if (result?.isNotEmpty ?? false) {
-        final Map<String, String> params =
-            Uri.parse('alipay://alipay?$result').queryParameters;
-        return AlipayAuthResult.fromJson(params);
-      }
-    }
-    return null;
-  }
 
   Map<String, dynamic> toJson() => _$AlipayRespToJson(this);
 

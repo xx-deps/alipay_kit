@@ -1,5 +1,5 @@
 #import "AlipayKitPlugin.h"
-#import <AlipaySDK/AlipaySDK.h>
+#import <AFServiceSDK/AFServiceSDK.h>
 
 @implementation AlipayKitPlugin {
     FlutterMethodChannel *_channel;
@@ -29,26 +29,25 @@
     } else if ([@"setEnv" isEqualToString:call.method]) {
         result(FlutterMethodNotImplemented);
     } else if ([@"pay" isEqualToString:call.method]) {
-        NSString *orderInfo = call.arguments[@"orderInfo"];
-        NSNumber *dynamicLaunch = call.arguments[@"dynamicLaunch"];
-        // NSNumber *isShowLoading = call.arguments[@"isShowLoading"];
-        NSString *scheme = ALIPAY_KIT_SCHEME;
-        [[AlipaySDK defaultService] payOrder:orderInfo
-                               dynamicLaunch:dynamicLaunch.boolValue
-                                  fromScheme:scheme
-                                    callback:^(NSDictionary *resultDic) {
-                                        [self->_channel invokeMethod:@"onPayResp" arguments:resultDic];
-                                    }];
-        result(nil);
+        result(FlutterMethodNotImplemented);
     } else if ([@"auth" isEqualToString:call.method]) {
         NSString *authInfo = call.arguments[@"authInfo"];
         // NSNumber * isShowLoading = call.arguments[@"isShowLoading"];
-        NSString *scheme = ALIPAY_KIT_SCHEME;
-        [[AlipaySDK defaultService] auth_V2WithInfo:authInfo
-                                         fromScheme:scheme
-                                           callback:^(NSDictionary *resultDic) {
-                                               [self->_channel invokeMethod:@"onAuthResp" arguments:resultDic];
-                                           }];
+//        [[AlipaySDK defaultService] auth_V2WithInfo:authInfo
+//                                         fromScheme:scheme
+//                                           callback:^(NSDictionary *resultDic) {
+//                                               [self->_channel invokeMethod:@"onAuthResp" arguments:resultDic];
+//                                           }];
+         NSDictionary  *params = @{kAFServiceOptionBizParams: @{
+                             @"url":authInfo},
+                             kAFServiceOptionCallbackScheme:  @"alipayauthbinding" ,
+                             };
+        [AFServiceCenter callService:(AFServiceAuth) withParams:params andCompletion:^(AFAuthServiceResponse *response) {
+            [self->_channel invokeMethod:@"onAuthResp" arguments:response.result];
+        }];
+//        [AFServiceCenter callService:AFServiceEInvoice withParams:params andCompletion:^(AFServiceResponse *response) {
+//            NSLog ( @"%@" , response.result);
+//        }];
         result(nil);
     } else {
         result(FlutterMethodNotImplemented);
@@ -66,21 +65,45 @@
 }
 
 - (BOOL)handleOpenURL:(NSURL *)url {
-    if ([url.host isEqualToString:@"safepay"]) {
+    if ([url.host isEqualToString:@"apmqpdispatch"]) {
         // 支付跳转支付宝钱包进行支付，处理支付结果
         __weak typeof(self) weakSelf = self;
-        [[AlipaySDK defaultService] processOrderWithPaymentResult:url
-                                                  standbyCallback:^(NSDictionary *resultDic) {
-                                                      __strong typeof(weakSelf) strongSelf = weakSelf;
-                                                      [strongSelf->_channel invokeMethod:@"onPayResp" arguments:resultDic];
-                                                  }];
-
-        // 授权跳转支付宝钱包进行支付，处理支付结果
-        [[AlipaySDK defaultService] processAuth_V2Result:url
-                                         standbyCallback:^(NSDictionary *resultDic) {
-                                             __strong typeof(weakSelf) strongSelf = weakSelf;
-                                             [strongSelf->_channel invokeMethod:@"onAuthResp" arguments:resultDic];
-                                         }];
+//        [[AlipaySDK defaultService] processOrderWithPaymentResult:url
+//                                                  standbyCallback:^(NSDictionary *resultDic) {
+//                                                      __strong typeof(weakSelf) strongSelf = weakSelf;
+//                                                      [strongSelf->_channel invokeMethod:@"onPayResp" arguments:resultDic];
+//                                                  }];
+//
+//        // 授权跳转支付宝钱包进行支付，处理支付结果
+//        [[AlipaySDK defaultService] processAuth_V2Result:url
+//                                         standbyCallback:^(NSDictionary *resultDic) {
+//                                             __strong typeof(weakSelf) strongSelf = weakSelf;
+//                                             [strongSelf->_channel invokeMethod:@"onAuthResp" arguments:resultDic];
+//                                         }];
+        [AFServiceCenter handleResponseURL:url withCompletion:^(AFAuthServiceResponse *response) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+//            NSDictionary  *resultDic = @{
+//                                         @"result":response.result
+//                                        
+//            };
+            
+            [strongSelf->_channel invokeMethod:@"onAuthResp" arguments:response.result];
+        }];
+//        [AFServiceCenter handleResponseURL:url withCompletion:^(AFServiceResponse *response) {
+//                   // 该接口上的block只有在跳转支付宝客户端授权过程中压后台App被系统kill掉时才会被回调
+//                   if  (AFResSuccess == response.responseCode) {
+//                       NSLog ( @"%@" , response.result);
+//                       /* 数据样例
+//                      {
+//                        "app_id" = 2016051801417322;
+//                        "auth_code" = 41f084c3ab4b4be6b6dd8d25dac1YF46;
+//                        "result_code" = SUCCESS;
+//                        "scope" = auth_user;
+//                        "state" = XXXXX（自定义 base64 编码）;
+//                      }
+//                    */
+//                  }
+//                }];
 
         return YES;
     }
